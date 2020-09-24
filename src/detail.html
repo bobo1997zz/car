@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>商品详情页</title>
+    <link rel="stylesheet" href="css/detail.css">
+</head>
+
+<body>
+    <div class="goodsinfo">
+        <div class="box">
+            <a href="cart.html" target="_blank">进入购物车</a>
+        </div>
+        <div class="wrap">
+            <div id="spic">
+                <img src="" alt="" id="smallpic">
+                <div id="sf"></div>
+            </div>
+            <div id="bf">
+                <img src="" alt="" id="bpic">
+            </div>
+            <div id="ulist">
+                <a href="javascript:;" id="left">&lt;</a>
+                <div id="list">
+                    <ul>
+
+                    </ul>
+                </div>
+                <a href="javascript:;" id="right">&gt;</a>
+            </div>
+        </div>
+        <div class="goodsinfo-word">
+            <div class="p-name">
+                <a class="loadtitle" href="##"></a>
+            </div>
+            <div class="p-price"><strong><em>￥</em><i class="loadpcp"></i></strong></div>
+            <div class="p-btn">
+                <input type="text" id="count" value="1" />
+                <a href="javascript:;">加入购物车</a>
+                <!-- void(0) -->
+            </div>
+        </div>
+    </div>
+
+</body>
+<script src="../../../JS2007/public2007.js"></script>
+<script src="https://cdn.bootcdn.net/ajax/libs/jquery/1.12.4/jquery.js"></script>
+<script>
+    class Render {
+        constructor() {
+            this.$sp = $("#smallpic")
+            this.$bp = $("#bpic")
+            this.$sf = $("#sf")
+            this.$bf = $("#bf")
+        }
+        init() {
+            this.rd()
+        }
+        rd() {
+            let sid = location.search.slice(1).split("=")[1]
+            if (!sid) {
+                sid = 1
+            }
+            $.ajax({
+                type: "post",
+                url: "http://localhost/text/cart/php/detail.php",
+                data: {
+                    sid: sid,
+                },
+                dataType: "JSON",
+            }).done(function(data) {
+
+                $("#smallpic").attr("src", data["url"])
+                $("#bpic").attr("src", data["url"])
+                let parr = data["piclisturl"].split(",")
+                console.log(parr)
+                let str = ""
+                $.each(parr, function(index, value) {
+                    str += `<li>
+                        <img src="${value}">
+                        </li>`
+                })
+                $("#list ul").html(str)
+                $(".p-name").html(data["title"])
+                $(".p-price").html(data["price"])
+                new Ul().init()
+            })
+        }
+    }
+    new Render().init()
+    class MagnifyingGlass {
+        constructor() {
+            this.$sp = $("#smallpic")
+            this.$bp = $("#bpic")
+            this.$sf = $("#sf")
+            this.$bf = $("#bf")
+            this.$bili = this.$bp.width() / this.$sp.width()
+            this.$box = $("#spic")
+            this.$ul = $("#list ul")
+        }
+        init() {
+            this.glass()
+            this.list()
+        }
+        glass() {
+            this.$box.on("mouseover", () => {
+                this.$sf.css({
+                    visibility: "visible",
+                    width: (this.$bf.width() * this.$sp.width()) / this.$bp.width(),
+                    height: (this.$bf.height() * this.$sp.height()) / this.$bp.height(),
+                })
+                this.$bf.css({
+                    visibility: "visible",
+                })
+                this.$box.on("mousemove", (ev) => {
+                    let l = ev.pageX - $(".wrap").offset().left - this.$sf.width() / 2
+                    let t = ev.pageY - $(".wrap").offset().top - this.$sf.height() / 2
+                    if (l <= 0) {
+                        l = 0
+                    } else if (l >= this.$box.width() - this.$sf.width()) {
+                        l = this.$box.width() - this.$sf.width()
+                    }
+                    if (t <= 0) {
+                        t = 0
+                    } else if (t >= this.$box.height() - this.$sf.height()) {
+                        t = this.$box.height() - this.$sf.height()
+                    }
+                    this.$sf.css({
+                        left: l,
+                        top: t,
+                    })
+                    this.$bp.css({
+                        left: -this.$bili * l,
+                        top: -this.$bili * t,
+                    })
+                })
+            })
+            this.$box.on("mouseout", () => {
+                this.$sf.css({
+                    visibility: "hidden",
+                })
+                this.$bf.css({
+                    visibility: "hidden",
+                })
+            })
+
+        }
+        list() {
+            this.$ul.on("click", "li", function() {
+                let src = $(this).find("img").attr("src")
+                console.log(src)
+                $("#smallpic").attr("src", src)
+                $("#bpic").attr("src", src)
+            })
+        }
+    }
+    new MagnifyingGlass().init()
+    class Ul {
+        constructor() {
+            this.num = 6
+            this.$li = $("#list ul li")
+            this.$left = $("#left")
+            this.$right = $("#right")
+        }
+        init() {
+            if (this.$li.size() <= this.num) {
+                this.$left.css({
+                    color: "white",
+                })
+                this.$right.css({
+                    color: "white",
+                })
+            }
+        }
+    }
+    class Liclick {
+        constructor() {
+            this.$ul = $("#list ul")
+            this.$left = $("#left")
+            this.$right = $("#right")
+            this.num = 6
+        }
+        init() {
+            this.leftc()
+            this.rightc()
+        }
+        rightc() {
+            this.$right.on("click", () => {
+                if ($("#list ul li").size() > this.num) {
+                    this.num += 1
+                    let cont = this.num - 6
+                    this.$ul.css({
+                        left: -$("#list ul li").eq(0).outerWidth(true) * cont,
+                    })
+                    this.$left.css({
+                        color: "black",
+                    })
+
+                } else {
+                    this.$right.css({
+                        color: "white",
+                    })
+                }
+            })
+        }
+        leftc() {
+            this.$left.on("click", () => {
+                if (this.num > 6) {
+                    this.num -= 1
+                    let cont = this.num - 6
+                    this.$ul.css({
+                        left: -$("#list ul li").eq(0).outerWidth(true) * cont,
+                    })
+                } else {
+                    this.$left.css({
+                        color: "white",
+                    })
+                    this.$right.css({
+                        color: "black",
+                    })
+                }
+            })
+        }
+    }
+    new Liclick().init()
+
+    //购物车
+
+    class Car {
+        constructor() {
+            this.$btn = $(".p-btn a")
+            this.sid = location.search.slice(1).split("=")[1]
+                // this.$num = $("#count").val()
+            this.arrsid = []
+            this.arrnum = []
+            this.$carbtn = $(".box a")
+        }
+        init() {
+            this.$btn.on("click", () => {
+                if (cookie.get("cooksid") && cookie.get("cooknum")) {
+                    this.arrsid = cookie.get("cooksid").split(",")
+                    this.arrnum = cookie.get("cooknum").split(",")
+                }
+                if ($.inArray(this.sid, this.arrsid) == -1) {
+                    console.log(1)
+                    this.arrsid.push(this.sid)
+                    this.arrnum.push($("#count").val())
+                    cookie.set("cooksid", this.arrsid, 10)
+                    cookie.set("cooknum", this.arrnum, 10)
+                } else {
+                    console.log(2)
+                    this.arrnum[this.arrsid.indexOf(this.sid)] = parseInt($("#count").val()) + parseInt(this.arrnum[this.arrsid.indexOf(this.sid)])
+                    cookie.set("cooksid", this.arrsid, 10)
+                    cookie.set("cooknum", this.arrnum, 10)
+                }
+            })
+
+        }
+
+
+    }
+    new Car().init()
+</script>
+
+</html>

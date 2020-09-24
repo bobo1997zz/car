@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>商品列表页</title>
+    <link rel="stylesheet" href="css/list.css">
+</head>
+
+<body>
+    <div class="list">
+        <ul>
+
+        </ul>
+    </div>
+</body>
+
+<script src="https://cdn.bootcdn.net/ajax/libs/jquery/1.12.4/jquery.js"></script>
+<script src="./jquery.lazyload.js"></script>
+<script>
+    class Render {
+        constructor() {
+            this.$ul = $(".list ul")
+        }
+        init() {
+            this.rd()
+            this.move()
+
+        }
+        rd() {
+            let $ul = $(".list ul")
+            $.ajax({
+                url: "http://localhost/text/cart/php/getsid.php",
+                dataType: "JSON",
+            }).done((data) => {
+                let str = ""
+                if (data) {
+                    console.log(data)
+                    $.each(data, (index, value) => {
+                        str += `<li>
+                        <a href="http://localhost/text/car%20jq/src/detail.html?sid=${value["sid"]}">
+                        <img  class="lazy" data-original="${value["url"]}" width="200" height="200">
+                        <p>${value["title"]}</p>
+                        <span>${value["price"]}</span>
+                        <span>${value["sailnumber"]}</span>
+                        </a>
+                        </li>`
+                    })
+                    $ul.html(str)
+
+                    $("img.lazy").lazyload({
+                        effect: "fadeIn" //图片显示方式
+                    });
+
+                }
+
+            })
+        }
+        move() {
+                this.$ul.on("mouseover", "li", function(ev) {
+                    $(this).css({
+                        border: "1px solid red",
+                    })
+                })
+                this.$ul.on("mouseout", "li", function(ev) {
+                    $(this).css({
+                        border: "1px solid black",
+                    })
+                })
+            }
+            // scroll() {
+
+
+        //         // $(window).on("scroll", () => {
+        //         //     $("img.lazy").lazyload({
+        //         //         effect: "fadeIn" //图片显示方式
+        //         //     });
+        //         // })
+        // }
+    }
+    new Render().init()
+</script>
+
+</html>
